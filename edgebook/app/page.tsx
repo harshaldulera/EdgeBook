@@ -1,22 +1,80 @@
-import Image from "next/image";
+"use client";
+import StatCard from "@/components/StatCard";
+import { PieChart, Pie, Cell } from "recharts";
+// import Image from "next/image";
 
 export default function Home() {
-  return (
-    <main className="p-10 space-y-8 min-h-screen bg-gray-900 text-gray-100">
-      <h1 className="text-4xl font-bold">📓 EdgeBook</h1>
-      <p className="text-lg text-gray-400">
-        Your personal trading journal & performance dashboard.
-      </p>
+  const netPnl = 248.78;
+  const tradeExpectancy = 248.78;
+  const profitFactor = 1.24;
+  const wins = 51;
+  const losses = 23;
+  const winRate = (wins / (wins + losses)) * 100;
+  const avgWin = 34.82;
+  const avgLoss = 51.32;
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="p-4 bg-gray-800 rounded-xl shadow">Net P&L: $3,240</div>
-        <div className="p-4 bg-gray-800 rounded-xl shadow">Win %: 62%</div>
-        <div className="p-4 bg-gray-800 rounded-xl shadow">Profit Factor: 1.8</div>
-        <div className="p-4 bg-gray-800 rounded-xl shadow">Day Win %: 58%</div>
-        <div className="p-4 bg-gray-800 rounded-xl shadow">
-          Avg Win/Loss: $120 / -$80
-        </div>
+
+  return (
+    <div className="space-y-8">
+      <h2 className="text-3xl font-bold">Dashboard</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <StatCard title="Net P&L" value={`$${netPnl.toFixed(2)}`} />
+        <StatCard title="Trade Expectancy" value={`$${tradeExpectancy.toFixed(2)}`} />
+        <StatCard
+          title="Profit Factor"
+          value={profitFactor.toFixed(2)}
+          chart={
+            <PieChart width={100} height={60}>
+              <Pie
+                data={[
+                  { name: "Value", value: profitFactor },
+                  { name: "Rest", value: Math.max(0, 3 - profitFactor) },
+                ]}
+                startAngle={180}
+                endAngle={0}
+                innerRadius={25}
+                outerRadius={35}
+                paddingAngle={2}
+                dataKey="value"
+              >
+                <Cell fill="#4ade80" /> 
+                <Cell fill="#374151" /> 
+              </Pie>
+            </PieChart>
+          }
+        />
+        <StatCard
+          title="Win %"
+          value={`${winRate.toFixed(2)}%`}
+          chart={
+            <PieChart width={80} height={80}>
+              <Pie
+                data={[
+                  { name: "Wins", value: wins },
+                  { name: "Losses", value: losses },
+                ]}
+                innerRadius={25}
+                outerRadius={35}
+                dataKey="value"
+              >
+                <Cell fill="#4ade80" />
+                <Cell fill="#ef4444" />
+              </Pie>
+            </PieChart>
+          }
+        />
+        <StatCard
+          title="Avg win/loss trade"
+          value={`$${avgWin.toFixed(2)} / $${avgLoss.toFixed(2)}`}
+          chart={
+            <div className="flex justify-between text-sm">
+              <span className="text-green-400">${avgWin.toFixed(2)}</span>
+              <span className="text-red-400">${avgLoss}</span>
+            </div>
+          }
+        />
       </div>
-    </main>
+    </div>
   );
 }
