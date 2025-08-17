@@ -21,11 +21,11 @@ export async function POST(req: Request) {
 
     // verify that the account belongs to this user
     const { data: account, error: accError } = await supabase
-    .from("trading_accounts")
-    .select("id")
-    .eq("id", body.account_id)  // <- matching account_id
-    .eq("user_id", user.id)     // <- must also match logged in user
-    .single();
+        .from("trading_accounts")
+        .select("id")
+        .eq("id", body.account_id)
+        .eq("user_id", user.id)
+        .single();
 
     if (accError || !account) {
         return NextResponse.json(
@@ -34,19 +34,34 @@ export async function POST(req: Request) {
         );
     }
 
+    // --- Parse numeric inputs ---
+    const entry = body.entry_price ? Number(body.entry_price) : null;
+    const exit = body.exit_price ? Number(body.exit_price) : null;
+    const size = body.size ? Number(body.size) : null;
+
+    // --- Auto-calc PnL ---
+    let pnl: number | null = null;
+    if (entry !== null && exit !== null && size !== null) {
+        if (body.side?.toLowerCase() === "long") {
+            pnl = (exit - entry) * size;
+        } else if (body.side?.toLowerCase() === "short") {
+            pnl = (entry - exit) * size;
+        }
+    }
+
     // insert trade
     const { error } = await supabase.from("trades").insert([
         {
             account_id: body.account_id,
-            user_id: user.id, // ✅ always save user_id too
+            user_id: user.id,
             symbol: body.symbol,
             side: body.side,
-            entry_price: body.entry_price ? Number(body.entry_price) : null,
-            exit_price: body.exit_price ? Number(body.exit_price) : null,
-            size: body.size ? Number(body.size) : null,
-            pnl: body.pnl ? Number(body.pnl) : null,
+            entry_price: entry,
+            exit_price: exit,
+            size,
+            pnl, // ✅ auto-calculated
             notes: body.notes || null,
-            trade_date: body.trade_date || new Date().toISOString(), // fallback
+            trade_date: body.trade_date || new Date().toISOString(),
         },
     ]);
 
