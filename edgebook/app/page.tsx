@@ -5,11 +5,16 @@ import StatCard from "@/components/StatCard";
 import { PieChart, Pie, Cell } from "recharts";
 import Link from "next/link";
 
+interface User {
+  id: string;
+  email: string;
+}
+
 export default function Home() {
   const supabase = useSupabaseClient();
   const user = useUser();
 
-  const [trades, setTrades] = useState<any[]>([]);
+  const [trades, setTrades] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -144,7 +149,7 @@ export default function Home() {
           }
         />
       </div>
-      
+
       {/* --- Trade History --- */}
       <div className="bg-gray-800 rounded-lg shadow p-4">
         <h3 className="text-xl font-semibold mb-3">Recent Trades</h3>

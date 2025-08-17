@@ -1,10 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-// import { createClient } from "@/utils/supabase/client";
+
+interface Trade {
+    id: string;
+    account_id: string;
+    user_id: string;
+    symbol: string;
+    side: "long" | "short";
+    entry_price: number | null;
+    exit_price: number | null;
+    size: number | null;
+    pnl: number | null;
+    notes?: string | null;
+    trade_date: string;
+  }
+  
 
 export default function TradesPage() {
-    const [accounts, setAccounts] = useState<any[]>([]);
+    const [accounts, setAccounts] = useState<Trade[]>([]);
     const [form, setForm] = useState({
         account_id: "",
         symbol: "",
