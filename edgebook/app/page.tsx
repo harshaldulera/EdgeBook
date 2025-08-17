@@ -183,25 +183,31 @@ export default function Home() {
             </thead>
             <tbody>
               {trades
-                .slice(-5) // last 5 trades
-                .reverse() // newest first
-                .map((t) => (
-                  <tr key={t.id} className="border-b border-gray-700 last:border-0">
-                    <td className="py-2">{t.symbol}</td>
-                    <td
-                      className={`py-2 font-medium ${t.side === "long" ? "text-green-400" : "text-red-400"
-                        }`}
+                .slice(-5)
+                .reverse()
+                .map((t) => {
+                  const pnl = t.pnl ?? 0;
+                  return (
+                    <tr
+                      key={t.id}
+                      className="border-b border-gray-700 last:border-0"
                     >
-                      {t.side}
-                    </td>
-                    <td
-                      className={`py-2 font-semibold ${t.pnl >= 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                    >
-                      ${t.pnl?.toFixed(2) || "0.00"}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="py-2">{t.symbol}</td>
+                      <td
+                        className={`py-2 font-medium ${t.side === "long" ? "text-green-400" : "text-red-400"
+                          }`}
+                      >
+                        {t.side}
+                      </td>
+                      <td
+                        className={`py-2 font-semibold ${pnl >= 0 ? "text-green-400" : "text-red-400"
+                          }`}
+                      >
+                        ${pnl.toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         )}
