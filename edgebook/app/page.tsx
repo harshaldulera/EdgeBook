@@ -24,12 +24,23 @@ interface Trade {
   trade_date: string;
 }
 
+interface Account {
+  id: string;
+  user_id: string;
+  name: string;
+  broker: string;
+  balance: number | null;
+  created_at: string;
+}
+
+
 
 export default function Home() {
   const supabase = useSupabaseClient();
   const user = useUser();
 
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

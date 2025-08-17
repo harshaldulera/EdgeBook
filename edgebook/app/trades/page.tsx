@@ -14,16 +14,26 @@ interface Trade {
     pnl: number | null;
     notes?: string | null;
     trade_date: string;
-  }
+}
 
-  interface User {
+interface User {
     id: string;
     email: string;
-  }
-  
+}
+
+interface Account {
+    id: string;
+    user_id: string;
+    name: string;
+    broker: string;
+    balance: number | null;
+    created_at: string;
+}
+
+
 
 export default function TradesPage() {
-    const [accounts, setAccounts] = useState<User[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
     const [form, setForm] = useState({
         account_id: "",
         symbol: "",
