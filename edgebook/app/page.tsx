@@ -84,8 +84,8 @@ export default function Home() {
     trades.length > 0 ? totalPnL / trades.length : 0;
   const profitFactor =
     losses.length > 0
-      ? wins.reduce((s, t) => s + t.pnl, 0) /
-      Math.abs(losses.reduce((s, t) => s + t.pnl, 0))
+      ? wins.reduce((s, t) => s + (t.pnl ?? 0), 0) /
+      Math.abs(losses.reduce((s, t) => s + (t.pnl ?? 0), 0))
       : wins.length > 0
         ? 999 // all wins, huge PF
         : 0;
@@ -93,12 +93,14 @@ export default function Home() {
     trades.length > 0 ? (wins.length / trades.length) * 100 : 0;
   const avgWin =
     wins.length > 0
-      ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length
+      ? wins.reduce((s, t) => s + (t.pnl ?? 0), 0) / wins.length
       : 0;
+
   const avgLoss =
     losses.length > 0
-      ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length
+      ? losses.reduce((s, t) => s + (t.pnl ?? 0), 0) / losses.length
       : 0;
+
 
   return (
     <div className="space-y-8">
