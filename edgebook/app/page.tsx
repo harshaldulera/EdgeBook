@@ -10,11 +10,26 @@ interface User {
   email: string;
 }
 
+interface Trade {
+  id: string;
+  account_id: string;
+  user_id: string;
+  symbol: string;
+  side: "long" | "short";
+  entry_price: number | null;
+  exit_price: number | null;
+  size: number | null;
+  pnl: number | null;
+  notes?: string | null;
+  trade_date: string;
+}
+
+
 export default function Home() {
   const supabase = useSupabaseClient();
   const user = useUser();
 
-  const [trades, setTrades] = useState<User[]>([]);
+  const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,9 +75,9 @@ export default function Home() {
   }
 
   // --- Metrics Calculation ---
-  const totalPnL = trades.reduce((sum, t) => sum + (t.pnl || 0), 0);
-  const wins = trades.filter((t) => t.pnl > 0);
-  const losses = trades.filter((t) => t.pnl <= 0);
+  const totalPnL = trades.reduce((sum, t) => sum + (t.pnl ?? 0), 0);
+  const wins = trades.filter((t) => (t.pnl ?? 0) > 0);
+  const losses = trades.filter((t) => (t.pnl ?? 0) <= 0);
 
   const netPnl = totalPnL;
   const tradeExpectancy =

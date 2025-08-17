@@ -15,10 +15,15 @@ interface Trade {
     notes?: string | null;
     trade_date: string;
   }
+
+  interface User {
+    id: string;
+    email: string;
+  }
   
 
 export default function TradesPage() {
-    const [accounts, setAccounts] = useState<Trade[]>([]);
+    const [accounts, setAccounts] = useState<User[]>([]);
     const [form, setForm] = useState({
         account_id: "",
         symbol: "",
