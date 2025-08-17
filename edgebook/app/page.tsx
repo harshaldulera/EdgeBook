@@ -1,9 +1,27 @@
 "use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import StatCard from "@/components/StatCard";
 import { PieChart, Pie, Cell } from "recharts";
-// import Image from "next/image";
+import Link from "next/link";
+
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+        <p className="text-lg">You must log in first.</p>
+        <Link href="/login" className="text-blue-500 hover:text-blue-400">Go to login</Link>
+      </div>
+    )
+  }
+
   const netPnl = 248.78;
   const tradeExpectancy = 248.78;
   const profitFactor = 1.24;
