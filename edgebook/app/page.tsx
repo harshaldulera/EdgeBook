@@ -1,36 +1,84 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import StatCard from "@/components/StatCard";
 import { PieChart, Pie, Cell } from "recharts";
 import Link from "next/link";
 
-
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
+  const supabase = useSupabaseClient();
+  const user = useUser();
+
+  const [trades, setTrades] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-  }, []);
+    if (!user) return;
+
+    const fetchTrades = async () => {
+      setLoading(true);
+
+      // Get trades for the logged-in user (and later account_id filter)
+      const { data, error } = await supabase
+        .from("trades")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error fetching trades:", error.message);
+      } else {
+        setTrades(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchTrades();
+  }, [user, supabase]);
 
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
         <p className="text-lg">You must log in first.</p>
-        <Link href="/login" className="text-blue-500 hover:text-blue-400">Go to login</Link>
+        <Link href="/login" className="text-blue-500 hover:text-blue-400">
+          Go to login
+        </Link>
       </div>
-    )
+    );
   }
 
-  const netPnl = 248.78;
-  const tradeExpectancy = 248.78;
-  const profitFactor = 1.24;
-  const wins = 51;
-  const losses = 23;
-  const winRate = (wins / (wins + losses)) * 100;
-  const avgWin = 34.82;
-  const avgLoss = 51.32;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+        <p>Loading your trades...</p>
+      </div>
+    );
+  }
 
+  // --- Metrics Calculation ---
+  const totalPnL = trades.reduce((sum, t) => sum + (t.pnl || 0), 0);
+  const wins = trades.filter((t) => t.pnl > 0);
+  const losses = trades.filter((t) => t.pnl <= 0);
+
+  const netPnl = totalPnL;
+  const tradeExpectancy =
+    trades.length > 0 ? totalPnL / trades.length : 0;
+  const profitFactor =
+    losses.length > 0
+      ? wins.reduce((s, t) => s + t.pnl, 0) /
+      Math.abs(losses.reduce((s, t) => s + t.pnl, 0))
+      : wins.length > 0
+        ? 999 // all wins, huge PF
+        : 0;
+  const winRate =
+    trades.length > 0 ? (wins.length / trades.length) * 100 : 0;
+  const avgWin =
+    wins.length > 0
+      ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length
+      : 0;
+  const avgLoss =
+    losses.length > 0
+      ? losses.reduce((s, t) => s + t.pnl, 0) / losses.length
+      : 0;
 
   return (
     <div className="space-y-8">
@@ -38,7 +86,10 @@ export default function Home() {
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <StatCard title="Net P&L" value={`$${netPnl.toFixed(2)}`} />
-        <StatCard title="Trade Expectancy" value={`$${tradeExpectancy.toFixed(2)}`} />
+        <StatCard
+          title="Trade Expectancy"
+          value={`$${tradeExpectancy.toFixed(2)}`}
+        />
         <StatCard
           title="Profit Factor"
           value={profitFactor.toFixed(2)}
@@ -56,8 +107,8 @@ export default function Home() {
                 paddingAngle={2}
                 dataKey="value"
               >
-                <Cell fill="#4ade80" /> 
-                <Cell fill="#374151" /> 
+                <Cell fill="#4ade80" />
+                <Cell fill="#374151" />
               </Pie>
             </PieChart>
           }
@@ -69,8 +120,8 @@ export default function Home() {
             <PieChart width={80} height={80}>
               <Pie
                 data={[
-                  { name: "Wins", value: wins },
-                  { name: "Losses", value: losses },
+                  { name: "Wins", value: wins.length },
+                  { name: "Losses", value: losses.length },
                 ]}
                 innerRadius={25}
                 outerRadius={35}
@@ -88,10 +139,50 @@ export default function Home() {
           chart={
             <div className="flex justify-between text-sm">
               <span className="text-green-400">${avgWin.toFixed(2)}</span>
-              <span className="text-red-400">${avgLoss}</span>
+              <span className="text-red-400">${avgLoss.toFixed(2)}</span>
             </div>
           }
         />
+      </div>
+      
+      {/* --- Trade History --- */}
+      <div className="bg-gray-800 rounded-lg shadow p-4">
+        <h3 className="text-xl font-semibold mb-3">Recent Trades</h3>
+        {trades.length === 0 ? (
+          <p className="text-gray-400">No trades logged yet.</p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="text-gray-400 border-b border-gray-700">
+                <th className="py-2">Symbol</th>
+                <th className="py-2">Side</th>
+                <th className="py-2">Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trades
+                .slice(-5) // last 5 trades
+                .reverse() // newest first
+                .map((t) => (
+                  <tr key={t.id} className="border-b border-gray-700 last:border-0">
+                    <td className="py-2">{t.symbol}</td>
+                    <td
+                      className={`py-2 font-medium ${t.side === "long" ? "text-green-400" : "text-red-400"
+                        }`}
+                    >
+                      {t.side}
+                    </td>
+                    <td
+                      className={`py-2 font-semibold ${t.pnl >= 0 ? "text-green-400" : "text-red-400"
+                        }`}
+                    >
+                      ${t.pnl?.toFixed(2) || "0.00"}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

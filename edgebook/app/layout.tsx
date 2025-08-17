@@ -1,12 +1,20 @@
+"use client";
 import "./globals.css";
 import Link from "next/link";
 
-export const metadata = {
-  title: "EdgeBook",
-  description: "Trading Journal & Dashboard",
-};
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { useState } from "react";
+
+
+// export const metadata = {
+//   title: "EdgeBook",
+//   description: "Trading Journal & Dashboard",
+// };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+
   return (
     <html lang="en">
       <body className="flex min-h-screen bg-gray-900 text-gray-100">
@@ -22,7 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-10">{children}</main>
+        <main className="flex-1 p-10"><SessionContextProvider supabaseClient={supabaseClient}>
+          {children}
+        </SessionContextProvider></main>
       </body>
     </html>
   );
