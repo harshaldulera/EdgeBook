@@ -82,9 +82,9 @@ export default function TradesPage() {
 
         const data = await res.json();
         if (data.success) {
-            alert("✅ Trade logged!");
+            alert("Trade logged!");
         } else {
-            alert("❌ Error: " + data.error);
+            alert("Error: " + data.error);
         }
     };
 
@@ -102,7 +102,7 @@ export default function TradesPage() {
                         href="/accounts"
                         className="text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-500"
                     >
-                        ➕ Add Account
+                        Add Account
                     </Link>
                 </div>
 

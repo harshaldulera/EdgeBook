@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         );
     }
 
-    // --- Parse numeric inputs ---
+    // prase numeric inputs
     const entry = body.entry_price ? Number(body.entry_price) : null;
     const exit = body.exit_price ? Number(body.exit_price) : null;
     const size = body.size ? Number(body.size) : null;

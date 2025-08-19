@@ -36,11 +36,11 @@ export default function AccountsPage() {
 
         const data = await res.json();
         if (data.success) {
-            alert("✅ Account created!");
+            alert("Account created!");
             setForm({ name: "", broker: "" });
             fetchAccounts();
         } else {
-            alert("❌ Error: " + data.error);
+            alert("Error: " + data.error);
         }
     };
 

@@ -85,7 +85,7 @@ export default function Home() {
     );
   }
 
-  // --- Metrics Calculation ---
+  // Metrics Calculation
   const totalPnL = trades.reduce((sum, t) => sum + (t.pnl ?? 0), 0);
   const wins = trades.filter((t) => (t.pnl ?? 0) > 0);
   const losses = trades.filter((t) => (t.pnl ?? 0) <= 0);
